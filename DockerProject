@@ -1,0 +1,70 @@
+pipeline {
+    agent { label "built-in" }
+    tools {
+  jdk 'java8'
+}
+    stages {
+        stage ('Parellel') {
+            stage ("Cloning") {
+                steps {
+                    cleanWs()
+                    git credentialsId: 'Lokesh', url: 'https://github.com/kiran064/Myproject.git'
+                }
+            }
+            stage ("Build") {
+                steps {
+                    sh "mvn clean install"
+                }
+            }
+            stage ("Copy") {
+                steps {
+                    stash includes: 'target/*.war', name: 'project'
+                }
+            }
+            stage ("Deploy"){
+            agent { label "Linux" }
+            steps {
+                sh "sudo yum install docker -y"
+                sh "sudo systemctl start docker.service"
+                //sh "docker container stop ${docker container -aq}"
+                sh "sudo docker stop tomcat"
+                sh "sudo docker system prune -a -f"
+                cleanWs()
+                unstash 'project'
+                sh "sudo docker run -it -p 8090:8080 -v /home/ec2-user/workspace/Project/target:/usr/local/tomcat/webapps -d --name tomcat tomcat:9.0.70-jdk11-corretto-al2"
+                //sh "sudo docker exec tomcat sh -c 'cp -r /usr/local/tomcat/webapps.dist/* /usr/local/tomcat/webapps/'"
+                }
+            }
+        agent { label "built-in" }
+        stage ("Cloning") {
+            steps {
+                cleanWs()
+                git 'https://github.com/kiran064/game-of-life.git'
+            }
+        }
+        stage ("Build") {
+            steps {
+                sh "mvn clean install"
+            }
+        }
+        stage ("Copy") {
+            steps {
+                stash includes: 'gameoflife-web/target/*.war', name: 'project2'
+            }
+        }
+        stage ("Deploy"){
+		agent { label "Linux" }
+		steps {
+		    cleanWs()
+		    sh "sudo yum install docker -y"
+		    sh "sudo systemctl start docker.service"
+		    sh "sudo docker stop tomcat"
+            sh "sudo docker system prune -a -f"
+		    unstash 'project2'
+		    //sh "sudo cp -r /home/ec2-user/workspace/Project2/gameoflife-web/target/vprofile-v2.war /tom/"
+		    sh "sudo docker run -it -p 8090:8080 -v /home/ec2-user/workspace/Project2/gameoflife-web/target:/usr/local/tomcat/webapps -d --name tomcat tomcat:8"
+		    //sh "sudo docker exec tomcat sh -c 'cp -r /usr/local/tomcat/webapps.dist/* /usr/local/tomcat/webapps/'"
+		    }
+        }
+    }
+}
