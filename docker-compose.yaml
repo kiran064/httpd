@@ -1,14 +1,14 @@
 version: "3.9"
 services:
   web1:
-    image: "tomcat:9.0.70-jdk11-corretto-al2"
+    image: "httpd"
     ports:
-      - "8085:8080"
+      - "8090:80"
     volumes:
-      - ./target:/usr/local/tomcat/webapps
+      - ./vertex:/usr/local/apache2/htdocs/
   web2:
-    image: "tomcat:9"
+    image: "httpd"
     ports:
-      - "8090:8080"
+      - "8080:80"
     volumes:
-      - ./gameoflife-web/target:/usr/local/tomcat/webapps
+      - ./tinker:/usr/local/apache2/htdocs/
