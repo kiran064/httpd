@@ -1,14 +1,8 @@
-version: "3.9"
+version: "3"
 services:
   web1:
-    image: "httpd"
+    image: "tomcat:8.5-jre8-temurin-focal"
     ports:
-      - "8090:80"
+      - "80:8080"
     volumes:
-      - ./vertex:/usr/local/apache2/htdocs/
-  web2:
-    image: "httpd"
-    ports:
-      - "8080:80"
-    volumes:
-      - ./tinker:/usr/local/apache2/htdocs/
+      - ./gameoflife-web/target:/usr/local/tomcat/webapps
